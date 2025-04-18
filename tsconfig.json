@@ -1,0 +1,48 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noUnusedLocals": true,
+    "strictPropertyInitialization": false,
+    "noUnusedParameters": false,
+    "noUncheckedSideEffectImports": false,
+    "noImplicitAny": false,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "ui/*": ["./src/components/ui/*"],
+      "service/*": ["./src/service/*"],
+      "app-types/*": ["./src/types/*"],
+      "logger": ["./src/lib/logger.ts"],
+      "lib/*": ["./src/lib/*"],
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/types/global.d.ts",
+    "vitest.setup.ts",
+    "vitest.config.ts",
+    "drizzle.config.ts"
+  ],
+  "exclude": ["node_modules"]
+}
