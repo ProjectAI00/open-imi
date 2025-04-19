@@ -27,6 +27,7 @@ import { AppSidebarMenus } from "./app-sidebar-menus";
 import { AppSidebarThreads } from "./app-sidebar-threads";
 import { AppSidebarUser } from "./app-sidebar-user";
 import { MCPIcon } from "ui/mcp-icon";
+import Image from "next/image";
 const browserSidebarStorage = getStorageManager<boolean>("sidebar_state");
 
 export function AppSidebar() {
@@ -61,8 +62,14 @@ export function AppSidebar() {
           <SidebarMenuItem className="flex items-center gap-0.5">
             <SidebarMenuButton asChild>
               <Link href="/">
-                <MCPIcon className="size-4 fill-foreground" />
-                <h4 className="font-bold">mcp/chat-bot</h4>
+                <Image 
+                  src="/images/imi logo.jpg" 
+                  alt="IMI Logo" 
+                  width={24} 
+                  height={24} 
+                  className="rounded-sm mr-2"
+                />
+                <h4 className="font-serif text-lg tracking-wide">IMI</h4>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

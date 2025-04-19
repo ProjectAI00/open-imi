@@ -11,7 +11,6 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import JsonView from "./ui/json-view";
 import { toast } from "sonner";
-import { safe, watchOk } from "ts-safe";
 import { useRouter } from "next/navigation";
 import { createDebounce, isNull, safeJSONParse } from "lib/utils";
 import { handleErrorWithToast } from "ui/shared-toast";
@@ -24,13 +23,15 @@ import {
 import { updateMcpClientAction } from "@/app/api/mcp/actions";
 import { insertMcpClientAction } from "@/app/api/mcp/actions";
 import equal from "fast-deep-equal";
-import { Alert, AlertDescription, AlertTitle } from "ui/alert";
 import { removeMcpClientAction } from "@/app/api/mcp/actions";
 
 interface MCPEditorProps {
   initialConfig?: MCPServerConfig;
   name?: string;
 }
+
+// Connection mode types
+type ConnectionMode = "json" | "url";
 
 const STDIO_ARGS_ENV_PLACEHOLDER = `/** STDIO Example */
 {
@@ -39,15 +40,17 @@ const STDIO_ARGS_ENV_PLACEHOLDER = `/** STDIO Example */
   "env": {
     "OPENAI_API_KEY": "sk-...",
   }
-}
+}`;
 
-/** SSE Example */
+const SSE_EXAMPLE_PLACEHOLDER = `/** SSE Example */
 {
   "url": "https://api.example.com",
   "headers": {
     "Authorization": "Bearer sk-..."
   }
 }`;
+
+const URL_PLACEHOLDER = "https://api.example.com";
 
 export default function MCPEditor({
   initialConfig,
@@ -60,6 +63,19 @@ export default function MCPEditor({
   const convertDebounce = useMemo(() => createDebounce(), []);
   const errorDebounce = useMemo(() => createDebounce(), []);
 
+  // Determine initial connection mode based on initialConfig
+  const getInitialMode = (): ConnectionMode => {
+    if (!initialConfig) return "json";
+    if ("url" in initialConfig) return "url";
+    return "json";
+  };
+
+  // State for connection mode
+  const [connectionMode, setConnectionMode] = useState<ConnectionMode>(getInitialMode());
+  const [url, setUrl] = useState<string>(
+    initialConfig && "url" in initialConfig ? initialConfig.url as string : ""
+  );
+
   // State for form fields
   const [name, setName] = useState<string>(initialName ?? "");
   const router = useRouter();
@@ -71,30 +87,52 @@ export default function MCPEditor({
   );
 
   const saveDisabled = useMemo(() => {
-    return (
-      name.trim() === "" ||
-      isLoading ||
-      !!jsonError ||
-      !isMaybeMCPServerConfig(config)
-    );
-  }, [isLoading, jsonError, config, name]);
+    if (name.trim() === "" || isLoading) return true;
+    
+    if (connectionMode === "json") {
+      return !!jsonError || !isMaybeMCPServerConfig(config);
+    } else if (connectionMode === "url") {
+      return !url || !url.startsWith("http");
+    }
+    
+    return true;
+  }, [isLoading, jsonError, config, name, connectionMode, url]);
 
   // Validate
   const validateConfig = (jsonConfig: unknown): boolean => {
-    const result = isMaybeSseConfig(jsonConfig)
-      ? MCPSseConfigZodSchema.safeParse(jsonConfig)
-      : MCPStdioConfigZodSchema.safeParse(jsonConfig);
-    if (!result.success) {
-      handleErrorWithToast(result.error, "mcp-editor-error");
+    if (connectionMode === "json") {
+      const result = isMaybeSseConfig(jsonConfig)
+        ? MCPSseConfigZodSchema.safeParse(jsonConfig)
+        : MCPStdioConfigZodSchema.safeParse(jsonConfig);
+      if (!result.success) {
+        handleErrorWithToast(result.error, "mcp-editor-error");
+      }
+      return result.success;
     }
-    return result.success;
+    return true;
+  };
+
+  // Build config based on connection mode
+  const buildFinalConfig = (): MCPServerConfig => {
+    if (connectionMode === "json") {
+      return config;
+    } else if (connectionMode === "url") {
+      return {
+        url,
+        headers: {}
+      };
+    }
+    return config;
   };
 
   // Handle save button click
   const handleSave = async () => {
     try {
+      // Build the final config
+      const finalConfig = buildFinalConfig();
+      
       // Perform validation
-      if (!validateConfig(config)) return;
+      if (connectionMode === "json" && !validateConfig(config)) return;
       if (!name) {
         toast.error("Name is required");
         return;
@@ -103,11 +141,11 @@ export default function MCPEditor({
       setIsLoading(true);
       
       // Log for debugging
-      console.log("Saving MCP config:", { name, initialName, config, shouldInsert });
+      console.log("Saving MCP config:", { name, initialName, finalConfig, shouldInsert });
       
       // Use the appropriate action based on whether we're inserting or updating
       if (shouldInsert) {
-        const result = await insertMcpClientAction(name, config);
+        const result = await insertMcpClientAction(name, finalConfig);
         console.log("Insert result:", result);
       } else {
         // Check if the name has changed
@@ -121,11 +159,11 @@ export default function MCPEditor({
           
           // Then insert with the new name
           console.log("Adding with new name:", name);
-          const result = await insertMcpClientAction(name, config);
+          const result = await insertMcpClientAction(name, finalConfig);
           console.log("Insert with new name result:", result);
         } else {
           // Just update the existing entry
-          const result = await updateMcpClientAction(name, config);
+          const result = await updateMcpClientAction(name, finalConfig);
           console.log("Update result:", result);
         }
       }
@@ -216,10 +254,31 @@ export default function MCPEditor({
 
   return (
     <div className="flex flex-col space-y-6">
+      {/* Connection Mode Selection */}
+      <div className="space-y-2">
+        <Label>Connection Type</Label>
+        <div className="grid grid-cols-2 gap-4">
+          <div 
+            className={`p-3 border rounded-md cursor-pointer text-center ${connectionMode === 'json' ? 'border-primary bg-primary/5' : 'border-muted'}`}
+            onClick={() => setConnectionMode('json')}
+          >
+            <div className="font-medium">JSON</div>
+            <div className="text-xs text-muted-foreground">STDIO / SSE</div>
+          </div>
+          
+          <div 
+            className={`p-3 border rounded-md cursor-pointer text-center ${connectionMode === 'url' ? 'border-primary bg-primary/5' : 'border-muted'}`}
+            onClick={() => setConnectionMode('url')}
+          >
+            <div className="font-medium">URL</div>
+            <div className="text-xs text-muted-foreground">SSE</div>
+          </div>
+        </div>
+      </div>
+
       {/* Name field */}
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
-
         <Input
           id="name"
           value={name}
@@ -227,64 +286,79 @@ export default function MCPEditor({
           placeholder="Enter mcp server name"
         />
       </div>
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="config">Config</Label>
-        </div>
 
-        {/* Split view for config editor */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* Left side: Textarea for editing */}
+      {/* Connection mode specific fields */}
+      {connectionMode === 'json' && (
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Label
-              htmlFor="config-editor"
-              className="text-xs text-muted-foreground"
-            >
-              JSON Editor
-            </Label>
-            <Textarea
-              id="config-editor"
-              value={jsonString}
-              onChange={(e) => handleConfigChange(e.target.value)}
-              className="font-mono h-[40vh] resize-none overflow-y-auto"
-              placeholder={STDIO_ARGS_ENV_PLACEHOLDER}
-            />
+            <Label htmlFor="config">Config</Label>
           </div>
 
-          {/* Right side: JSON view */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="config-view"
-              className="text-xs text-muted-foreground"
-            >
-              JSON Preview
-            </Label>
-            <div className="border rounded-md p-4 h-[40vh] overflow-auto relative">
-              <JsonView data={config} initialExpandDepth={3} />
-              {jsonError && jsonString && (
-                <div className="absolute w-full bottom-0 right-0 px-2 pb-2 animate-in fade-in-0 duration-300">
-                  <Alert variant="destructive" className="border-destructive">
-                    <AlertTitle className="text-xs font-semibold">
-                      Parsing Error
-                    </AlertTitle>
-                    <AlertDescription className="text-xs">
-                      {jsonError}
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              )}
+          {/* Split view for config editor */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Left side: Textarea for editing */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="config-editor"
+                className="text-xs text-muted-foreground"
+              >
+                JSON Editor
+              </Label>
+              <Textarea
+                id="config-editor"
+                value={jsonString}
+                onChange={(e) => handleConfigChange(e.target.value)}
+                className="font-mono h-[40vh] resize-none overflow-y-auto"
+                placeholder={isMaybeSseConfig(config) ? SSE_EXAMPLE_PLACEHOLDER : STDIO_ARGS_ENV_PLACEHOLDER}
+              />
+            </div>
+
+            {/* Right side: JSON preview */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="config-preview"
+                className="text-xs text-muted-foreground"
+              >
+                JSON Preview
+              </Label>
+              <div className="border border-input rounded-md p-2 h-[40vh] overflow-y-auto bg-muted/30 text-sm">
+                {jsonError ? (
+                  <div className="text-destructive text-xs p-2">{jsonError}</div>
+                ) : (
+                  <JsonView data={config} />
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* URL Connection mode */}
+      {connectionMode === 'url' && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="url">SSE Server URL</Label>
+            <Input
+              id="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder={URL_PLACEHOLDER}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Enter the URL of your SSE-compatible MCP server
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Save button */}
-      <Button onClick={handleSave} className="w-full" disabled={saveDisabled}>
-        {isLoading ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          <span className="font-bold">Save Configuration</span>
-        )}
+      <Button
+        onClick={handleSave}
+        disabled={saveDisabled}
+        className="flex gap-2"
+      >
+        {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+        Save Configuration
       </Button>
     </div>
   );
