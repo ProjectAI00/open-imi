@@ -145,6 +145,7 @@ export function MCPServerList() {
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{server.name}</span>
+                    <span className="text-xs text-muted-foreground">(click for details)</span>
                     <ExternalLink className="h-3 w-3 text-muted-foreground" />
                   </div>
                   <ServerTypeIndicator config={server.config} />
@@ -273,22 +274,18 @@ function ConnectionStatusBadge({ status }: { status: string }) {
 
 function ServerTypeIndicator({ config }: { config: any }) {
   let type = "Unknown";
-  let detail = "";
   
   if (config) {
     if (config.command) {
       type = "CLI";
-      detail = config.command;
     } else if (config.url) {
       type = "SSE";
-      detail = config.url;
     }
   }
   
   return (
     <div className="text-xs text-muted-foreground">
       <span className="capitalize">{type}</span>
-      {detail && ` • ${detail}`}
     </div>
   );
 } 
