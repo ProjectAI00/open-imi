@@ -3,7 +3,6 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -25,16 +24,38 @@ import { selectThreadListByUserIdAction } from "@/app/api/chat/actions";
 import { cn } from "lib/utils";
 import { AppSidebarMenus } from "./app-sidebar-menus";
 import { AppSidebarThreads } from "./app-sidebar-threads";
-import { AppSidebarUser } from "./app-sidebar-user";
+import { News, NewsArticle } from "@/components/ui/sidebar-news";
 import { MCPIcon } from "ui/mcp-icon";
 import Image from "next/image";
 const browserSidebarStorage = getStorageManager<boolean>("sidebar_state");
 
+// De drie slides
+const newsArticles: NewsArticle[] = [
+  {
+    href: "https://github.com/ProjectAI00/open-imi",
+    title: "Support us on GitHub",
+    summary: "Star our repository and contribute to the open-imi project",
+    image: "/images/github-logo.svg"
+  },
+  {
+    href: "https://imi.vercel.app",
+    title: "Visit our website",
+    summary: "Check out the official IMI website for more information",
+    image: "/images/imi logo.jpg"
+  },
+  {
+    href: "https://tally.so/r/mVNK5l",
+    title: "Join our waitlist",
+    summary: "Be the first to know when we launch new features",
+    image: "/images/waitlist.svg"
+  }
+];
+
 export function AppSidebar() {
   const { open } = useSidebar();
 
-  const [storeMutate, user] = appStore(
-    useShallow((state) => [state.mutate, state.user]),
+  const [storeMutate] = appStore(
+    useShallow((state) => [state.mutate]),
   );
 
   const { data: threadList, isLoading } = useSWR(
@@ -82,9 +103,14 @@ export function AppSidebar() {
         </div>
         <AppSidebarThreads isLoading={isLoading} threadList={threadList} />
       </SidebarContent>
-      <SidebarFooter className="border-t border-dashed">
-        <AppSidebarUser user={user} />
-      </SidebarFooter>
+      
+      {/* Nieuws component toegevoegd */}
+      <div className={cn(open ? "block" : "hidden", "mt-auto")}>
+        <div className="mb-2 px-4">
+          <h4 className="text-xs font-medium text-muted-foreground mb-1">IMI Project</h4>
+          <News articles={newsArticles} />
+        </div>
+      </div>
     </Sidebar>
   );
 }

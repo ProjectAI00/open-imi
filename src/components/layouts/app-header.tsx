@@ -18,8 +18,6 @@ import { useMounted } from "@/hooks/use-mounted";
 import { ThreadDropdown } from "../thread-dropdown";
 import { appStore } from "@/app/store";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
-import { GithubIcon } from "ui/github-icon";
 
 function ThreadDropdownComponent() {
   const currentThread = appStore((state) => state.getCurrentThread());
@@ -76,20 +74,11 @@ export function AppHeader() {
           {componentByPage}
         </>
       )}
-      <Link
-        href="https://github.com/cgoinglove/mcp-client-chatbot"
-        target="_blank"
-        className="ml-auto"
-      >
-        <Button variant="ghost" size="icon">
-          <GithubIcon className="w-4 h-4 fill-foreground" />
-        </Button>
-      </Link>
-
       <Button
         variant="ghost"
         size="icon"
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        className="ml-auto"
       >
         {isMounted && icon}
       </Button>
