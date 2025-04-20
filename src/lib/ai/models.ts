@@ -3,6 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import { google } from "@ai-sdk/google";
 import { anthropic } from "@ai-sdk/anthropic";
 import { xai } from "@ai-sdk/xai";
+import { groq } from "@ai-sdk/groq";
 import {
   extractReasoningMiddleware,
   LanguageModel,
@@ -47,6 +48,11 @@ export const allModels = {
     "grok-2": xai("grok-2-1212"),
     "grok-3-mini": wrappedReasoningModel(xai("grok-3-mini-beta")),
     "grok-3": wrappedReasoningModel(xai("grok-3-beta")),
+  },
+  groq: {
+    "llama-4-scout": groq("meta-llama/llama-4-scout-17b-16e-instruct"),
+    "llama-4-maverick": groq("meta-llama/llama-4-maverick-17b-128e-instruct"),
+    "qwen-qwq-32b": groq("qwen-qwq-32b"),
   },
   ollama: {
     "gemma3:1b": ollama("gemma3:1b"),

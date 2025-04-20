@@ -96,10 +96,10 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="mt-6">
+      <SidebarContent className="mt-1">
         <AppSidebarMenus isOpen={open} />
         <div className={cn(!open && "hidden", "w-full px-4 mt-4")}>
-          <div className="w-full h-1 border-t border-dashed" />
+          <div className="w-full h-1 border-t" />
         </div>
         <AppSidebarThreads isLoading={isLoading} threadList={threadList} />
       </SidebarContent>

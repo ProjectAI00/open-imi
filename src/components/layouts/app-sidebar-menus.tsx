@@ -9,48 +9,16 @@ import { cn } from "lib/utils";
 import { SidebarGroup } from "ui/sidebar";
 import { TooltipProvider } from "ui/tooltip";
 import Link from "next/link";
-import { Library, MessageCircleDashed } from "lucide-react";
-import { useCallback } from "react";
+import { Library } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { generateUUID } from "lib/utils";
 
 export function AppSidebarMenus({ isOpen }: { isOpen: boolean }) {
   const router = useRouter();
-  
-  // Functie om een nieuwe chat te starten
-  const handleNewChat = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    // Navigeren naar homepagina met unieke query parameter om refresh te forceren
-    router.push(`/?new=${generateUUID()}`);
-  }, [router]);
 
   return (
-    <SidebarGroup className={cn(isOpen && "px-4")}>
+    <SidebarGroup className={cn(isOpen && "px-4", "pt-0")}>
       <SidebarGroupContent>
-        <SidebarMenu className="mb-3">
-          <TooltipProvider>
-            <Tooltip>
-              <SidebarMenuItem>
-                <TooltipTrigger asChild>
-                  <SidebarMenuButton
-                    className={cn(
-                      isOpen && "flex  justify-center ",
-                      "border border-dashed border-ring/80 font-semibold",
-                    )}
-                    onClick={handleNewChat}
-                  >
-                    <MessageCircleDashed />
-                    New Chat
-                  </SidebarMenuButton>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p>New Chat</p>
-                </TooltipContent>
-              </SidebarMenuItem>
-            </Tooltip>
-          </TooltipProvider>
-        </SidebarMenu>
-        <SidebarMenu>
+        <SidebarMenu className="mt-0">
           <TooltipProvider>
             <Tooltip>
               <SidebarMenuItem>
