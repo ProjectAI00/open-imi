@@ -1,6 +1,20 @@
+We're working on properly mentioning previous contributors who helped making open imi since we launched the version a bit to early.
+
+Massive shoutout 2:
+https://github.com/cgoinglove for https://github.com/cgoinglove/mcp-client-chatbot , we forked parts of the mcp client connection with servers and mcp page json based file. 
+contributors of https://github.com/vercel/ai-chatbot for the ai chat interface which was the orginal code imi was built on top of. 
+https://github.com/danny-avila/LibreChat for mcp connection logic.
+https://21st.dev/ for ui components. 
 
 
-imi3 is a chat interface that allows you to easily utilize various AI providers ([OpenAI](https://openai.com/), [Anthropic](https://www.anthropic.com/), [Google](https://ai.google.dev/), [Ollama](https://ollama.com/), etc.) while connecting powerful AI tools through [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction).
+open imi is a chat interface that allows you to easily utilize various AI providers 
+([OpenAI](https://openai.com/), 
+[Anthropic](https://www.anthropic.com/),
+[Google](https://ai.google.dev/), 
+[Ollama](https://ollama.com/),
+
+
+while connecting powerful AI tools through [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction).
 
 > This project was developed using Vercel's open source libraries such as [Next.js](https://nextjs.org/) and [AI SDK](https://sdk.vercel.ai/)[shadcn/ui](https://ui.shadcn.com/), and is designed to run immediately in local environments or personal servers without complex setup. You can easily add and experiment with AI tools through file-based MCP management.
 
