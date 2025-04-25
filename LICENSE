@@ -1,10 +1,10 @@
 Copyright 2025 Open IMI Project
 
 This project is derived from several open-source projects:
-1. MCP Client Chatbot - https://github.com/cgoinglove/mcp-client-chatbot (Licensed under MIT license)
-2. Vercel AI Chatbot - https://github.com/vercel/ai-chatbot (Licensed under Apache License 2.0)
-3. LibreChat - https://github.com/danny-avila/LibreChat (For MCP connection logic)
-4. 21st.dev - https://21st.dev/ (For UI components)
+1. MCP Client Chatbot - https://github.com/cgoinglove/mcp-client-chatbot
+2. Vercel AI Chatbot - https://github.com/vercel/ai-chatbot 
+3. LibreChat - https://github.com/danny-avila/LibreChat 
+4. 21st.dev - https://21st.dev/ 
 
 MIT License
 
