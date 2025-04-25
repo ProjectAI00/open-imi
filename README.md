@@ -73,5 +73,12 @@ This project is licensed under the same terms as the original repositories it's 
 - [MCP Client Chatbot](https://github.com/cgoinglove/mcp-client-chatbot) is licensed under the MIT License
 - [Vercel AI Chatbot](https://github.com/vercel/ai-chatbot) is licensed under the Apache License 2.0
 
+
+### What is next?
+
+- chat and file search.
+- multi page work flow.
+- project management page.
+
 Please refer to the respective repositories for more details on licensing.
 
